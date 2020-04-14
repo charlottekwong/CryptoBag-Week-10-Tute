@@ -2,7 +2,9 @@ package au.edu.unsw.infs3634.cryptobag;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.List;
 
@@ -36,37 +39,11 @@ public class DetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if(getArguments().containsKey(ARG_ITEM_ID)) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://api.coinlore.com")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
 
-            CoinService service = retrofit.create(CoinService.class);
-            Call<CoinLoreResponse> coinsCall = service.getCoins();
-            coinsCall.enqueue(new Callback<CoinLoreResponse>(){
-                @Override
-                public void onResponse(Call<CoinLoreResponse> call, Response<CoinLoreResponse> response) {
-                    List<Coin> coins = response.body().getData();
-                    for (Coin coin : coins) {
-                        if (coin.getId().equals(getArguments().getString(ARG_ITEM_ID))) {
-                            mCoin = coin;
-                            break;
-                        }
-                    }
-
-                    updateUi();
-                    DetailFragment.this.getActivity().setTitle(mCoin.getName());
-
+            new DetailTask().execute();
                 }
-
-                @Override
-                public void onFailure(Call<CoinLoreResponse> call, Throwable t) {
-
-                }
-            });
 
         }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,7 +52,7 @@ public class DetailFragment extends Fragment {
         return rootView;
     }
 
-        private void updateUi() {
+        public void updateUi() {
             View rootView = getView();
         if (mCoin != null) {
             NumberFormat formatter = NumberFormat.getCurrencyInstance();
@@ -100,5 +77,45 @@ public class DetailFragment extends Fragment {
     private void searchCoin(String name) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + name));
         startActivity(intent);
+    }
+
+    private class DetailTask extends AsyncTask<Void, Void, List<Coin>>{
+
+        @Override
+        protected List<Coin> doInBackground(Void... voids) {
+
+            try {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl("https://api.coinlore.net")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                CoinService service = retrofit.create(CoinService.class);
+                Call<CoinLoreResponse> coinsCall = service.getCoins();
+                Response<CoinLoreResponse> response = coinsCall.execute();
+
+                List<Coin> coins = response.body().getData();
+                return coins;
+            } catch
+            (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(List<Coin> coins) {
+            super.onPostExecute(coins);
+            for (Coin coin : coins) {
+                if (coin.getId().equals(getArguments().getString(ARG_ITEM_ID))) {
+                    mCoin = coin;
+                    updateUi();
+                    break;
+                }
+            }
+
+            DetailFragment.this.getActivity().setTitle(mCoin.getName());
+        }
     }
 }

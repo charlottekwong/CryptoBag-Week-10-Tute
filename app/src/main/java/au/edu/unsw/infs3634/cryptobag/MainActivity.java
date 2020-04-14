@@ -1,5 +1,6 @@
 package au.edu.unsw.infs3634.cryptobag;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private boolean mTwoPane;
+    private CoinAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,35 +39,48 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-        RecyclerView.Adapter mAdapter = new CoinAdapter(this, new ArrayList<Coin>(), mTwoPane);
+        mAdapter = new CoinAdapter(this, new ArrayList<Coin>(), mTwoPane);
         mRecyclerView.setAdapter(mAdapter);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.coinlore.net")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
 
-        CoinService service = retrofit.create(CoinService.class);
-        Call<CoinLoreResponse> coinsCall = service.getCoins();
+        new MyTask().execute();
 
+    }
 
+    public class MyTask extends AsyncTask<Void, Void, List<Coin>> {
 
-        coinsCall.enqueue(new Callback<CoinLoreResponse>() {
-            @Override
-            public void onResponse(Call<CoinLoreResponse> call, Response<CoinLoreResponse> response) {
-                List<Coin> coins = response.body().getData();
-                ((CoinAdapter) mAdapter).setCoins(coins);
+        @Override
+        protected List<Coin> doInBackground(Void... voids) {
 
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://api.coinlore.net")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            CoinService service = retrofit.create(CoinService.class);
+            Call<CoinLoreResponse> coinsCall = service.getCoins();
+            Response<CoinLoreResponse> response = null;
+            try {
+                response = coinsCall.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public void onFailure(Call<CoinLoreResponse> call, Throwable t) {
+            List<Coin> coins = response.body().getData();
 
-            }
+            return coins;
 
-        });
+        }
+
+        @Override
+        protected void onPostExecute(List<Coin> coins) {
+            super.onPostExecute(coins);
+
+            mAdapter.setCoins(coins);
+        }
+    }
 
 
     }
-}
+
+

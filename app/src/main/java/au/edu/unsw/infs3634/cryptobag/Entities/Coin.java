@@ -1,12 +1,19 @@
 package au.edu.unsw.infs3634.cryptobag.Entities;
 
 import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Coin {
+@Entity
+public class Coin implements Serializable
+{
 
+    @PrimaryKey
+    @NonNull
     @SerializedName("id")
     @Expose
     private String id;
@@ -55,6 +62,53 @@ public class Coin {
     @SerializedName("msupply")
     @Expose
     private String msupply;
+    private final static long serialVersionUID = -7788521239405538888L;
+
+    /**
+     * No args constructor for use in serialization
+     *
+     */
+    public Coin() {
+    }
+
+    /**
+     *
+     * @param symbol
+     * @param volume24a
+     * @param priceUsd
+     * @param priceBtc
+     * @param volume24
+     * @param percentChange24h
+     * @param percentChange7d
+     * @param marketCapUsd
+     * @param msupply
+     * @param tsupply
+     * @param name
+     * @param nameid
+     * @param rank
+     * @param csupply
+     * @param id
+     * @param percentChange1h
+     */
+    public Coin(String id, String symbol, String name, String nameid, Integer rank, String priceUsd, String percentChange24h, String percentChange1h, String percentChange7d, String priceBtc, String marketCapUsd, Double volume24, Double volume24a, String csupply, String tsupply, String msupply) {
+        super();
+        this.id = id;
+        this.symbol = symbol;
+        this.name = name;
+        this.nameid = nameid;
+        this.rank = rank;
+        this.priceUsd = priceUsd;
+        this.percentChange24h = percentChange24h;
+        this.percentChange1h = percentChange1h;
+        this.percentChange7d = percentChange7d;
+        this.priceBtc = priceBtc;
+        this.marketCapUsd = marketCapUsd;
+        this.volume24 = volume24;
+        this.volume24a = volume24a;
+        this.csupply = csupply;
+        this.tsupply = tsupply;
+        this.msupply = msupply;
+    }
 
     public String getId() {
         return id;
@@ -62,6 +116,11 @@ public class Coin {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Coin withId(String id) {
+        this.id = id;
+        return this;
     }
 
     public String getSymbol() {
@@ -72,12 +131,22 @@ public class Coin {
         this.symbol = symbol;
     }
 
+    public Coin withSymbol(String symbol) {
+        this.symbol = symbol;
+        return this;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Coin withName(String name) {
+        this.name = name;
+        return this;
     }
 
     public String getNameid() {
@@ -88,12 +157,22 @@ public class Coin {
         this.nameid = nameid;
     }
 
+    public Coin withNameid(String nameid) {
+        this.nameid = nameid;
+        return this;
+    }
+
     public Integer getRank() {
         return rank;
     }
 
     public void setRank(Integer rank) {
         this.rank = rank;
+    }
+
+    public Coin withRank(Integer rank) {
+        this.rank = rank;
+        return this;
     }
 
     public String getPriceUsd() {
@@ -104,12 +183,22 @@ public class Coin {
         this.priceUsd = priceUsd;
     }
 
+    public Coin withPriceUsd(String priceUsd) {
+        this.priceUsd = priceUsd;
+        return this;
+    }
+
     public String getPercentChange24h() {
         return percentChange24h;
     }
 
     public void setPercentChange24h(String percentChange24h) {
         this.percentChange24h = percentChange24h;
+    }
+
+    public Coin withPercentChange24h(String percentChange24h) {
+        this.percentChange24h = percentChange24h;
+        return this;
     }
 
     public String getPercentChange1h() {
@@ -120,12 +209,22 @@ public class Coin {
         this.percentChange1h = percentChange1h;
     }
 
+    public Coin withPercentChange1h(String percentChange1h) {
+        this.percentChange1h = percentChange1h;
+        return this;
+    }
+
     public String getPercentChange7d() {
         return percentChange7d;
     }
 
     public void setPercentChange7d(String percentChange7d) {
         this.percentChange7d = percentChange7d;
+    }
+
+    public Coin withPercentChange7d(String percentChange7d) {
+        this.percentChange7d = percentChange7d;
+        return this;
     }
 
     public String getPriceBtc() {
@@ -136,12 +235,22 @@ public class Coin {
         this.priceBtc = priceBtc;
     }
 
+    public Coin withPriceBtc(String priceBtc) {
+        this.priceBtc = priceBtc;
+        return this;
+    }
+
     public String getMarketCapUsd() {
         return marketCapUsd;
     }
 
     public void setMarketCapUsd(String marketCapUsd) {
         this.marketCapUsd = marketCapUsd;
+    }
+
+    public Coin withMarketCapUsd(String marketCapUsd) {
+        this.marketCapUsd = marketCapUsd;
+        return this;
     }
 
     public Double getVolume24() {
@@ -152,12 +261,22 @@ public class Coin {
         this.volume24 = volume24;
     }
 
+    public Coin withVolume24(Double volume24) {
+        this.volume24 = volume24;
+        return this;
+    }
+
     public Double getVolume24a() {
         return volume24a;
     }
 
     public void setVolume24a(Double volume24a) {
         this.volume24a = volume24a;
+    }
+
+    public Coin withVolume24a(Double volume24a) {
+        this.volume24a = volume24a;
+        return this;
     }
 
     public String getCsupply() {
@@ -168,12 +287,22 @@ public class Coin {
         this.csupply = csupply;
     }
 
+    public Coin withCsupply(String csupply) {
+        this.csupply = csupply;
+        return this;
+    }
+
     public String getTsupply() {
         return tsupply;
     }
 
     public void setTsupply(String tsupply) {
         this.tsupply = tsupply;
+    }
+
+    public Coin withTsupply(String tsupply) {
+        this.tsupply = tsupply;
+        return this;
     }
 
     public String getMsupply() {
@@ -184,9 +313,10 @@ public class Coin {
         this.msupply = msupply;
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return id;
+    public Coin withMsupply(String msupply) {
+        this.msupply = msupply;
+        return this;
     }
+
+
 }

@@ -11,39 +11,54 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.room.Room;
 
-import com.google.gson.Gson;
-
-import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.List;
 
 import au.edu.unsw.infs3634.cryptobag.Entities.Coin;
-import au.edu.unsw.infs3634.cryptobag.Entities.CoinLoreResponse;
-import au.edu.unsw.infs3634.cryptobag.Entities.CoinService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import au.edu.unsw.infs3634.cryptobag.Entities.CoinDatabase;
+
+import com.bumptech.glide.Glide;
 
 public class DetailFragment extends Fragment {
     public static final String ARG_ITEM_ID = "item_id";
+    public static final String TAG = "DetailFragment";
     private Coin mCoin;
+    private CoinDatabase database;
 
     public DetailFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        database = Room.databaseBuilder(getContext(), CoinDatabase.class, "coin-database").build();
 
         if(getArguments().containsKey(ARG_ITEM_ID)) {
 
-            new DetailTask().execute();
-                }
+            new GetCoinDBTask().execute(getArguments().getString(ARG_ITEM_ID));
 
         }
+    }
+
+
+    private class GetCoinDBTask extends AsyncTask<String, Void, Coin> {
+
+        @Override
+        protected Coin doInBackground(String... ids) {
+            return database.coinDao().getCoin(ids[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Coin coin) {
+            mCoin = coin;
+            updateUi();
+        }
+
+
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,10 +67,13 @@ public class DetailFragment extends Fragment {
         return rootView;
     }
 
-        public void updateUi() {
-            View rootView = getView();
-        if (mCoin != null) {
+    private void updateUi(){
+
+        View rootView = getView();
+
+        if(mCoin != null) {
             NumberFormat formatter = NumberFormat.getCurrencyInstance();
+           Glide.with(this).load("https://c1.coinlore.com/img/25x25/" + mCoin.getNameid() + ".png").fitCenter().into((ImageView) rootView.findViewById(R.id.imageView));
             ((TextView) rootView.findViewById(R.id.tvName)).setText(mCoin.getName());
             ((TextView) rootView.findViewById(R.id.tvSymbol)).setText(mCoin.getSymbol());
             ((TextView) rootView.findViewById(R.id.tvValueField)).setText(formatter.format(Double.valueOf(mCoin.getPriceUsd())));
@@ -64,58 +82,19 @@ public class DetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.tvChange7dField)).setText(mCoin.getPercentChange7d() + " %");
             ((TextView) rootView.findViewById(R.id.tvMarketcapField)).setText(formatter.format(Double.valueOf(mCoin.getMarketCapUsd())));
             ((TextView) rootView.findViewById(R.id.tvVolumeField)).setText(formatter.format(Double.valueOf(mCoin.getVolume24())));
+
             ((ImageView) rootView.findViewById(R.id.ivSearch)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     searchCoin(mCoin.getName());
                 }
             });
+            ((AppCompatActivity) rootView.getContext()).setTitle(mCoin.getName());
         }
     }
-
 
     private void searchCoin(String name) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + name));
         startActivity(intent);
-    }
-
-    private class DetailTask extends AsyncTask<Void, Void, List<Coin>>{
-
-        @Override
-        protected List<Coin> doInBackground(Void... voids) {
-
-            try {
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl("https://api.coinlore.net")
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
-
-                CoinService service = retrofit.create(CoinService.class);
-                Call<CoinLoreResponse> coinsCall = service.getCoins();
-                Response<CoinLoreResponse> response = coinsCall.execute();
-
-                List<Coin> coins = response.body().getData();
-                return coins;
-            } catch
-            (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-
-        @Override
-        protected void onPostExecute(List<Coin> coins) {
-            super.onPostExecute(coins);
-            for (Coin coin : coins) {
-                if (coin.getId().equals(getArguments().getString(ARG_ITEM_ID))) {
-                    mCoin = coin;
-                    updateUi();
-                    break;
-                }
-            }
-
-            DetailFragment.this.getActivity().setTitle(mCoin.getName());
-        }
     }
 }
